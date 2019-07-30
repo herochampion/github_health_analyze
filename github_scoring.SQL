@@ -39,7 +39,7 @@ SELECT
   (commit_score+first_merged_score+issue_remained_score+ratio_issue_score+issue_response_score)/5 as health_score,
   num_release,
   pull_avg_comment,
-  commit_score
+  commit_score,
   first_merged_score,
   issue_remained_score,
   ratio_issue_score,
