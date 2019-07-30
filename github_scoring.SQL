@@ -53,7 +53,8 @@ FROM ((
       data
     GROUP BY
       repo_name,
-      org_login) a /*
+      org_login) a 
+/*
 NUMBER OF COMMITS AND COMMITS_SCORE
 */
   LEFT JOIN (
@@ -81,7 +82,8 @@ NUMBER OF COMMITS AND COMMITS_SCORE
       org_login_commit) commit
   ON
     a.repo_name = commit.repo_name_commit
-    AND a.org_login = commit.org_login_commit /*
+    AND a.org_login = commit.org_login_commit
+/*
 NUMBER OF RELEASES
 */
   LEFT JOIN (
@@ -280,6 +282,7 @@ ON
   AND a.org_login = pull_comment.org_login_comment
   
  /*
+ Average response time of first response to an issue
  */
  LEFT JOIN (
   SELECT
