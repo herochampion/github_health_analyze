@@ -1,4 +1,4 @@
-# Foobar
+# GITHUB HEALTH SCORING
 
 A short program to execute github repo health score
 
