@@ -14,14 +14,18 @@ Ratio of closed to open issues
 
 Each rule will give a score from 0-1. A mean score will represent health
 ## Installation 
-Maven is required. 3.6.1
-Google Cloud
-Get Google Cloud services account key
+Maven is required. 3.6.1 \
+Google Cloud \
+Get Google Cloud services account key at below 
 ```bash
 GOOGLE_APPLICATION_CREDENTIALS = [PATH TO JSON FILE]
 ```
 
 ## Usage
+```
+You can query in Bigquery with github_scoring.SQL file
+```
+--OR--
 Compile
 ```bash
 mvn clean package
