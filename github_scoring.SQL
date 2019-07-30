@@ -36,7 +36,7 @@ SELECT
   repo_name,
   org_login,
   num_comits,
-  (commit_score+first_merged_score+issue_remained_score+ratio_issue_score+issue_response_score)/5 as health_score,
+  (commit_score+first_merged_score+issue_remained_score+ratio_issue_score+issue_response_score)/5 AS health_score,
   num_release,
   pull_avg_comment,
   commit_score,
@@ -44,7 +44,6 @@ SELECT
   issue_remained_score,
   ratio_issue_score,
   issue_response_score
-  
 FROM ((
     SELECT
       repo_name,
@@ -53,8 +52,7 @@ FROM ((
       data
     GROUP BY
       repo_name,
-      org_login) a 
-/*
+      org_login) a /*
 NUMBER OF COMMITS AND COMMITS_SCORE
 */
   LEFT JOIN (
@@ -82,8 +80,7 @@ NUMBER OF COMMITS AND COMMITS_SCORE
       org_login_commit) commit
   ON
     a.repo_name = commit.repo_name_commit
-    AND a.org_login = commit.org_login_commit
-/*
+    AND a.org_login = commit.org_login_commit /*
 NUMBER OF RELEASES
 */
   LEFT JOIN (
@@ -100,8 +97,7 @@ NUMBER OF RELEASES
       org_login_release ) release
   ON
     a.repo_name = release.repo_name_release
-    AND a.org_login = release.org_login_release 
-/*
+    AND a.org_login = release.org_login_release /*
 Average time for a pull request to get merged
 */
   LEFT JOIN (
@@ -146,12 +142,9 @@ Average time for a pull request to get merged
       org_login_pull ) first_pull
   ON
     a.repo_name = first_pull.repo_name_pull
-    AND a.org_login = first_pull.org_login_pull )
- 
-/*
+    AND a.org_login = first_pull.org_login_pull ) /*
 Average time that an issue remains opened
 */
-
 LEFT JOIN (
   SELECT
     repo_name AS repo_name_issue,
@@ -159,7 +152,7 @@ LEFT JOIN (
     CASE
       WHEN AVG(TIMESTAMP_DIFF(close_time_issue,open_time_issue, HOUR)) = 0 THEN 0
     ELSE
-    MIN(TIMESTAMP_DIFF(close_time_issue,open_time_issue, HOUR))/AVG(TIMESTAMP_DIFF(close_time_issue,open_time_issue, HOUR))
+    MIN(TIMESTAMP_DIFF(close_time_issue,open_time_issue, HOUR))/(AVG(TIMESTAMP_DIFF(close_time_issue,open_time_issue, HOUR)))
   END
     AS issue_remained_score
   FROM (
@@ -167,38 +160,35 @@ LEFT JOIN (
       repo_name,
       org_login,
       issue_id,
-      MAX(CASE
+      MIN(CASE
           WHEN action = 'opened' THEN created_at
-        ELSE
-        TIMESTAMP_ADD(CURRENT_TIMESTAMP(),INTERVAL -30 DAY)
       END
         ) AS open_time_issue,
       MAX(CASE
           WHEN action = 'closed' THEN created_at
-        ELSE
-        CURRENT_TIMESTAMP()
       END
         ) AS close_time_issue
     FROM
       data
     WHERE
       type = 'IssuesEvent'
-      and action in ('opened','closed')
+      AND action IN ('opened',
+        'closed')
     GROUP BY
       repo_name,
       org_login,
       issue_id )
+  WHERE
+    open_time_issue IS NOT NULL
+    AND close_time_issue IS NOT NULL
   GROUP BY
     repo_name_issue,
     org_login_issue) issue_remain
 ON
   a.repo_name = issue_remain.repo_name_issue
-  AND a.org_login = issue_remain.org_login_issue
-  
-/*
+  AND a.org_login = issue_remain.org_login_issue /*
 Ratio of closed to open issues
 */
-  
 LEFT JOIN (
   SELECT
     repo_name_issue_ratio,
@@ -243,12 +233,9 @@ LEFT JOIN (
     org_login_issue_ratio) ratio_issue
 ON
   a.repo_name = ratio_issue.repo_name_issue_ratio
-  AND a.org_login = ratio_issue.org_login_issue_ratio
-/*
+  AND a.org_login = ratio_issue.org_login_issue_ratio /*
 Average number of comments per pull requests
 */
-
-
 LEFT JOIN (
   SELECT
     repo_name_comment,
@@ -279,12 +266,10 @@ LEFT JOIN (
     org_login_comment) pull_comment
 ON
   a.repo_name = pull_comment.repo_name_comment
-  AND a.org_login = pull_comment.org_login_comment
-  
- /*
+  AND a.org_login = pull_comment.org_login_comment /*
  Average response time of first response to an issue
  */
- LEFT JOIN (
+LEFT JOIN (
   SELECT
     repo_name AS repo_name_issue_res,
     org_login AS org_login_issue_res,
@@ -302,7 +287,7 @@ ON
       MAX(CASE
           WHEN action = 'opened' THEN created_at
         ELSE
-        Null
+        NULL
       END
         ) AS open_time_issue,
       MIN(CASE
@@ -327,4 +312,5 @@ ON
   AND a.org_login = issue_response.org_login_issue_res
 ORDER BY
   health_score DESC
-LIMIT 1000
+LIMIT
+  1000
